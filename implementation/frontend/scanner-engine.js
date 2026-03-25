@@ -200,8 +200,11 @@ const Scanner = (function() {
     forbidden: ['RSA', 'ECDSA', 'ECDH', 'DH', 'DSA', 'MD5', 'SHA-1', '3DES', 'RC4', 'DES']
   };
 
-  // SSLyze API backend URL (configurable)
-  const SSLYZE_API_URL = 'http://localhost:5000';
+  // SSLyze API backend URL — auto-switches between production and local dev
+  // Replace YOUR_RENDER_APP_NAME with your actual Render service name after deploying
+  const SSLYZE_API_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:5001'
+    : 'https://YOUR_RENDER_APP_NAME.onrender.com';
 
   // ═══════════════════════════════════════════════════════
   // 1. CRYPTOSCAN — Source Code Analysis
