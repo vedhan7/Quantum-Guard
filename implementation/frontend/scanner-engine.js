@@ -204,7 +204,7 @@ const Scanner = (function() {
   // Replace YOUR_RENDER_APP_NAME with your actual Render service name after deploying
   const SSLYZE_API_URL = window.location.hostname === 'localhost'
     ? 'http://localhost:5001'
-    : 'https://YOUR_RENDER_APP_NAME.onrender.com';
+    : 'https://quantum-guard.onrender.com';
 
   // ═══════════════════════════════════════════════════════
   // 1. CRYPTOSCAN — Source Code Analysis
