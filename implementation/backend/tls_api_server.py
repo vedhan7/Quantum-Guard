@@ -19,15 +19,23 @@ app = Flask(__name__)
 
 # ---------------------------------------------------------------------------
 # CORS Configuration
-# In production, restrict to your Vercel frontend domain.
-# Set ALLOWED_ORIGINS env var as a comma-separated list, or use the default.
+# Accepts all Vercel deployment URLs for this project + localhost for dev.
+# Set ALLOWED_ORIGINS env var to override (comma-separated).
 # ---------------------------------------------------------------------------
-ALLOWED_ORIGINS = os.environ.get(
-    'ALLOWED_ORIGINS',
-    'https://quantum-guard-8bey.vercel.app,http://localhost:3000,http://localhost:5173'
-).split(',')
+import re
 
-CORS(app, origins=ALLOWED_ORIGINS)
+ALLOWED_ORIGINS_ENV = os.environ.get('ALLOWED_ORIGINS', '')
+
+if ALLOWED_ORIGINS_ENV:
+    CORS(app, origins=ALLOWED_ORIGINS_ENV.split(','))
+else:
+    # Match any Vercel preview/deployment URL for this project + localhost
+    CORS(app, origins=[
+        re.compile(r'https://quantum-guard.*\.vercel\.app'),
+        'http://localhost:3000',
+        'http://localhost:5001',
+        'http://localhost:5173',
+    ])
 
 
 @app.route('/health', methods=['GET'])
@@ -266,6 +274,6 @@ if __name__ == '__main__':
     print("=" * 60)
     print("  QuantumGuard TLS Scanner API")
     print(f"  Starting on http://localhost:{port}")
-    print(f"  CORS origins: {ALLOWED_ORIGINS}")
+    print(f"  CORS: regex-match quantum-guard*.vercel.app + localhost")
     print("=" * 60)
     app.run(host='0.0.0.0', port=port, debug=debug)
