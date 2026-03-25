@@ -583,3 +583,42 @@ def _check_mozilla_compliance(result):
 
     compliance['compliant'] = len(compliance['issues']) == 0
     result['mozilla_compliance'] = compliance
+
+
+def scan_multiple_hosts(targets, timeout=30, on_progress=None):
+    """
+    Scan multiple hosts concurrently.
+    targets: list of dicts with 'hostname' and 'port' keys
+    on_progress: callback(hostname, result) called after each host completes
+    """
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    results = []
+
+    def _scan_one(target):
+        hostname = target['hostname']
+        port = target.get('port', 443)
+        try:
+            res = scan_host(hostname, port)
+        except Exception as e:
+            res = {
+                'hostname': hostname,
+                'port': port,
+                'status': 'error',
+                'errors': [str(e)],
+                'quantum_score': 0,
+                'quantum_assessment': {},
+            }
+        return hostname, res
+
+    max_workers = min(len(targets), 5)
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {executor.submit(_scan_one, t): t for t in targets}
+        for future in as_completed(futures):
+            hostname, res = future.result()
+            results.append(res)
+            if on_progress:
+                on_progress(hostname, res)
+
+    return results
+
